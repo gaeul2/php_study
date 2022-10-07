@@ -12,3 +12,27 @@ $range_end = new DateTime();
 $input['year'] = filter_input(INPUT_POST, 'year', FILTER_VALIDATE_INT,
     array('options' => array('min_range' => 1900,
         'max_range' => 2100)));
+
+$input['month'] = filter_input(INPUT_POST, 'month', FILTER_VALIDATE_INT,
+    array('options' => array('min_range' => 1,
+        'max_range' => 12)));
+
+$input['day'] = filter_input(INPUT_POST, 'day', FILTER_VALIDATE_INT,
+    array('options' => array('min_range' => 1,
+        'max_range' => 31)));
+
+//연도, 월, 일은 0이 될일이 없으므로 ===항등연산자를 사용할 필요 없음.
+// 특정 월에 해당하는 일자가 올바른지 확인하고자 checkdate()함수를 사용한다.
+if ($input['year'] && $input['month'] && $input['day'] &&
+    checkdate($input['month'], $input['day'], $input['year'])) {
+    $submitted_date = new DateTime(strtotime($input['year'] . '-' .
+        $input['month'] . '-' .
+        $input['day']));
+    if (($range_start > $submitted_date) || ($range_end < $submitted_date)) {
+        $errors[] = '지난 6개월 사이에 속하는 날짜를 입력해주세요.';
+    }
+} else {
+    //이 부분은 연도, 월, 일, 폼 매개변수 중 하나라도 누락되었거나
+    // 2월 31일처럼 올바르지 않은 날짜를 입력했을때 실행된다.
+    $errors[] = '올바른 날짜를 입력해주세요';
+}
